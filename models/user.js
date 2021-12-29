@@ -10,6 +10,12 @@ const UserSchema = new Schema({
         type: String,
         required: [true, 'Password field is required']
     },
+    MobileNumber: {
+        type: Number
+    },
+    Email: {
+        type:String
+    }
 });
 
 
