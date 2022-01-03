@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
-const WatchList = require('../modals/watchList');
+const WatchList = require('../models/watchList');
 
 router.post('/Sign',(req,res,next)=> {
     User.find({UserName: req.body.UserName})
@@ -52,8 +52,34 @@ router.post('/Sign',(req,res,next)=> {
         })
     })
 
+ router.post('/watchlist' , (req,res,next) => {
+            WatchList.find({ UserName : req.body.UserName} )
+            .exec()
+            .then(response => {
+                if(response.length >= 1)
+                {
+                    {
+                        $addToSet: { MovieList : req.body.Movie}
+                    }
+                }
+                else {
+                    const watchList =new WatchList( {
+                        UserName : req.body.UserName,
+                        Movie : req.body.Movie,
+                        $addToSet : {
+                            MovieList : req.body.Movie,
+                           }
+                        })
+                    watchList.save()
+                    .then(()=> res.json())
+                    .catch(err=> err)
+                }
+            
+            })
+                }
+            )
+             
 
-    
 
    
 module.exports = router;
