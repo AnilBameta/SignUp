@@ -70,7 +70,7 @@ router.post('/watchlist', (req, res, next) => {
         }
         else {
             console.log(data)
-            res.status().json({
+            res.json({
                 message: 'Added Succesfully'
             })
         }
