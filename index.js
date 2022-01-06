@@ -15,7 +15,7 @@ app.use(cors());
     res.status(401).send({error: err.message});
     res.status(500).send({error: err.message});
  });
- app.listen(process.env.port || 4000, () => {
+ app.listen(process.env.PORT || 4000, () => {
     console.log('Ready to go');
  });
  
