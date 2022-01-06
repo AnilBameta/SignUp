@@ -14,7 +14,6 @@ router.post('/Sign', (req, res, next) => {
             }
             else {
                 const user = new User({
-                    // _id: req.params.UserId,
                     UserName: req.body.UserName,
                     Password: req.body.Password,
                     MobileNumber: req.body.MobileNumber,
@@ -50,7 +49,7 @@ router.post('/Login', (req, res, next) => {
             }
         })
 })
-let name = "Anil"
+
 router.post('/watchlist', (req, res, next) => {
 
     WatchList.find({ UserName: req.body.UserName })
