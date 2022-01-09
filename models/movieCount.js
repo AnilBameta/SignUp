@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const MovieCountSchema = new Schema( {
-
+    _id:mongoose.Schema.Types.ObjectId,
     Movie:{ 
-        type :  mongoose.Schema.Types.ObjectId,
-        ref :  "watchList"
+        type :String
     },
     count:{ type: Number}
 

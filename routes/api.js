@@ -81,52 +81,68 @@ router.post('/watchlist', (req, res, next) => {
 }
 ) 
 
-// let max=1
-// let sendItem =''
-// router.get('/watchlist', (req, res, next) => {
+let max=1
+let sendItem =''
+router.get('/watchlist', (req, res, next) => {
    
-//     WatchList.find({}).then(function(response){
-//             res.send(response);
-            // let m =[]
-            // let movie = response.slice()
-            // movie.map(item => {
-            //     item.MovieList.map(items => {
-            //         m.push(items)
-            //     })
-            //     })
-            //     console.log(m)
+    WatchList.find({}).then(function(response){
+            res.send(response);
+            let m =[]
+            let movie = response.slice()
+            movie.map(item => {
+                item.MovieList.map(items => {
+                    m.push(items)
+                })
+                })
+                console.log(m)
                    
-            //     let uniqueM = []
-            //     m.forEach((c) => {
-            //         if (!uniqueM.includes(c)) {
-            //             uniqueM.push(c);
-            //         }
-            //     });
-            //     console.log(uniqueM)
+                let uniqueM = []
+                m.forEach((c) => {
+                    if (!uniqueM.includes(c)) {
+                        uniqueM.push(c);
+                    }
+                });
+                console.log(uniqueM)
                 
-            //     uniqueM.map(item => {
-            //         function getOccurrence(array, value) {
-            //             var count = 0;
-            //             array.forEach((v) => (v.localeCompare(value)===0 && count++));
-            //             return count;
-            //         }
-            //         let output=getOccurrence(m, item)
+                uniqueM.map(item => {
+                    function getOccurrence(array, value) {
+                        var count = 0;
+                        array.forEach((v) => (v.localeCompare(value)===0 && count++));
+                        return count;
+                    }
+                    let output=getOccurrence(m, item)
                    
-            //         if(output>=max)
-            //         {
-            //             max=output
-            //             sendItem = item
-            //         }
+                    if(output>=max)
+                    {
+                        max=output
+                        sendItem = item
+                    }
                     
-            //     })
-            //     console.log(sendItem,max);
+                })
+                console.log(sendItem,max);
+
+                
+                MovieCount.insertMany({
+            
+                    "Movie":sendItem,
+                    "count":max
+               
+            }) 
+
+            }).catch(err => err);
+        })
 
 
+        router.get('/movieCount', (req, res, next) => {
+            MovieCount.find({"Movie":sendItem})
+            .then(response => res.send(response))
+            .catch(err=>err)
+            
+        })
+       
+       
 
-        //     }).catch(err => err);
-        // })
-
-
+         
         // router.post('/movieCount', (req, res, next) => {
 
         //     MovieCount.find({ Movie: req.body.Movie })
@@ -153,29 +169,29 @@ router.post('/watchlist', (req, res, next) => {
    
      
     
- router.post('/movieCount', (req, res, next) => {
-MovieCount.find({Movie: req.body.Movie})
-    .exec()
-    .then(response => {
-        if(response.length < 1) {
-            const movieCount =new MovieCount( {
-                Movie: req.body.Movie,
-                count: 1
-            })
-            movieCount.save()
-                    .then(() => res.json())
-                    .catch((err) => err)
-        }
+//  router.post('/movieCount', (req, res, next) => {
+// MovieCount.find({Movie: req.body.Movie})
+//     .exec()
+//     .then(response => {
+//         if(response.length < 1) {
+//             const movieCount =new MovieCount( {
+//                 Movie: req.body.Movie,
+//                 count: 1
+//             })
+//             movieCount.save()
+//                     .then(() => res.json())
+//                     .catch((err) => err)
+//         }
 
-        else {
-            MovieCount.updateOne(
-                {Movie: req.body.Movie},
-                { $inc: { count: +1 } }
-             )
-        }
-    })
+//         else {
+//             MovieCount.updateOne(
+//                 {Movie: req.body.Movie},
+//                 { $inc: { count: +1 } }
+//              )
+//         }
+//     })
 
- })
+//  })
 
 
 
