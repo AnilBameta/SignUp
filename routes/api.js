@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 const WatchList = require('../models/watchList');
+const MovieCount = require('../models/movieCount');
 
 router.post('/Sign', (req, res, next) => {
     User.find({ UserName: req.body.UserName })
@@ -52,19 +53,19 @@ router.post('/Login', (req, res, next) => {
 
 router.post('/watchlist', (req, res, next) => {
 
-    WatchList.find({ UserName: req.body.UserName })
-        .exec()
-        .then(response => {
-            if (response.length < 1) {
-                const watchList = new WatchList({
-                    UserName: req.body.UserName
-                })
-                watchList.save()
-                    .then(() => res.json())
-                    .catch((err) => err)
-            }
-        })
-    WatchList.findOneAndUpdate({ UserName: req.body.UserName }, { $addToSet: { MovieList: req.body.Movie } }, { new: true }, (error, data) => {
+    // WatchList.find({ UserName: req.body.UserName })
+    //     .exec()
+    //     .then(response => {
+    //         if (response.length < 1) {
+    //             const watchList = new WatchList({
+    //                 UserName: req.body.UserName
+    //             })
+    //             watchList.save()
+    //                 .then(() => res.json())
+    //                 .catch((err) => err)
+    //         }
+    //     })
+    WatchList.findOneAndUpdate({ UserName: req.body.UserName }, { $addToSet: { MovieList: req.body.Movie } }, { upsert: true }, (error, data) => {
         if (error) {
             return error
         }
@@ -76,9 +77,105 @@ router.post('/watchlist', (req, res, next) => {
         }
     }
     )
-}
-)
 
+}
+) 
+
+// let max=1
+// let sendItem =''
+// router.get('/watchlist', (req, res, next) => {
+   
+//     WatchList.find({}).then(function(response){
+//             res.send(response);
+            // let m =[]
+            // let movie = response.slice()
+            // movie.map(item => {
+            //     item.MovieList.map(items => {
+            //         m.push(items)
+            //     })
+            //     })
+            //     console.log(m)
+                   
+            //     let uniqueM = []
+            //     m.forEach((c) => {
+            //         if (!uniqueM.includes(c)) {
+            //             uniqueM.push(c);
+            //         }
+            //     });
+            //     console.log(uniqueM)
+                
+            //     uniqueM.map(item => {
+            //         function getOccurrence(array, value) {
+            //             var count = 0;
+            //             array.forEach((v) => (v.localeCompare(value)===0 && count++));
+            //             return count;
+            //         }
+            //         let output=getOccurrence(m, item)
+                   
+            //         if(output>=max)
+            //         {
+            //             max=output
+            //             sendItem = item
+            //         }
+                    
+            //     })
+            //     console.log(sendItem,max);
+
+
+
+        //     }).catch(err => err);
+        // })
+
+
+        // router.post('/movieCount', (req, res, next) => {
+
+        //     MovieCount.find({ Movie: req.body.Movie })
+        //         .exec()
+        //         .then(response => {
+        //             if (response.length < 1) {
+        //                 const movieCount = new MovieCount({
+        //                     Movie: req.body.Movie,
+        //                     count: req.body.count
+        //                 })
+        //                 movieCount.save()
+        //                     .then(() => res.json())
+        //                     .catch((err) => err)
+        //             }
+        //             else {
+        //               MovieCount.update({Movie: req.body.Movie,Count: req.body.Count},{$set:{Movie:sendItem,Count:max}},(err => console.log(err)))
+        //             }
+        //         })
+        //         .catch(err => err)
+            
+        //     })
+       
+       
+   
+     
+    
+ router.post('/movieCount', (req, res, next) => {
+MovieCount.find({Movie: req.body.Movie})
+    .exec()
+    .then(response => {
+        if(response.length < 1) {
+            const movieCount =new MovieCount( {
+                Movie: req.body.Movie,
+                count: 1
+            })
+            movieCount.save()
+                    .then(() => res.json())
+                    .catch((err) => err)
+        }
+
+        else {
+            MovieCount.updateOne(
+                {Movie: req.body.Movie},
+                { $inc: { count: +1 } }
+             )
+        }
+    })
+
+ })
 
 
 

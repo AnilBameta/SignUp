@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const WatchListSchema = new Schema({
-    // _id: mongoose.Schema.Types.ObjectId,
+     _id: mongoose.Types.ObjectId,
     UserName: {
         type: String,
         required: [true, 'UserName field is required']
