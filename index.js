@@ -19,7 +19,7 @@ mongoose.Promise = global.Promise;
     res.status(401).send({error: err.message});
     res.status(500).send({error: err.message});
  });
- app.listen(process.env.PORT || 8000, () => {
+ app.listen(process.env.PORT || 8080, () => {
     console.log('Ready to go');
  });
  
