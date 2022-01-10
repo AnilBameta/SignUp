@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require('../models/user');
 const WatchList = require('../models/watchList');
 const MovieCount = require('../models/movieCount');
-
+const GenreWise =require('../models/genrewise')
 router.post('/Sign', (req, res, next) => {
     User.find({ UserName: req.body.UserName })
         .exec()
@@ -81,56 +81,99 @@ router.post('/watchlist', (req, res, next) => {
 }
 ) 
 
-let max=1
-let sendItem =''
-router.get('/watchlist', (req, res, next) => {
+// let max=1
+// let sendItem =''
+// router.get('/watchlist', (req, res, next) => {
    
-    WatchList.find({}).then(function(response){
-            res.send(response);
-            let m =[]
-            let movie = response.slice()
-            movie.map(item => {
-                item.MovieList.map(items => {
-                    m.push(items)
-                })
-                })
-                console.log(m)
+//     WatchList.find({}).then(function(response){
+//             res.send(response);
+//             let m =[]
+//             let movie = response.slice()
+//             movie.map(item => {
+//                 item.MovieList.map(items => {
+//                     m.push(items)
+//                 })
+//                 })
+//                 console.log(m)
                    
-                let uniqueM = []
-                m.forEach((c) => {
-                    if (!uniqueM.includes(c)) {
-                        uniqueM.push(c);
-                    }
-                });
-                console.log(uniqueM)
+
+
+
+//                 for (let i=0; i<arr1.length; i++)
+// {
+//         for (let j=i; j<arr1.length; j++)
+//         {
+//                 if (arr1[i] == arr1[j])
+//                  m++;
+//                 if (mf<m)
+//                 {
+//                   mf=m; 
+//                   item = arr1[i];
+//                 }
+//         }
+//         m=0;
+// }
+// console.log(`${item} ( ${mf} times ) `) ;
+
+
+                // let uniqueM = []
+                // m.forEach((c) => {
+                //     if (!uniqueM.includes(c)) {
+                //         uniqueM.push(c);
+                //     }
+                // });
+                // console.log(uniqueM)
                 
-                uniqueM.map(item => {
-                    function getOccurrence(array, value) {
-                        var count = 0;
-                        array.forEach((v) => (v.localeCompare(value)===0 && count++));
-                        return count;
-                    }
-                    let output=getOccurrence(m, item)
+                // uniqueM.map(item => {
+                //     function getOccurrence(array, value) {
+                //         var count = 0;
+                //         array.forEach((v) => (v.localeCompare(value)===0 && count++));
+                //         return count;
+                //     }
+                //     let output=getOccurrence(m, item)
                    
-                    if(output>=max)
-                    {
-                        max=output
-                        sendItem = item
-                    }
+                //     if(output>=max)
+                //     {
+                //         max=output
+                //         sendItem = item
+                //     }
                     
-                })
-                console.log(sendItem,max);
+                // })
+        //         console.log(sendItem,max);
 
                 
-                MovieCount.insertMany({
+        //         MovieCount.insertMany({
             
-                    "Movie":sendItem,
-                    "count":max
+        //             "Movie":sendItem,
+        //             "count":max
                
-            }) 
+        //     }) 
 
-            }).catch(err => err);
-        })
+        //     }).catch(err => err);
+        // })
+
+        router.get('/watchlist', async (req, res, next) => {
+                    await WatchList.aggregate(
+                    [
+                      { $unwind : "$MovieList" },
+                      { $group : { _id : "$MovieList" , count : { $sum : 1 } } },
+                      { $sort : { count : -1 } },
+                      { $limit : 1 }
+                    ]
+                  )
+                  .then( response =>
+                    MovieCount.insertMany({
+            
+                                    "Movie":response[0]._id,
+                                    "count":response[0].count
+                               
+                            }) 
+                     
+                  )
+                  .catch(err => err)
+            })
+           
+           
 
 
         router.get('/movieCount', (req, res, next) => {
@@ -140,7 +183,19 @@ router.get('/watchlist', (req, res, next) => {
             
         })
        
-       
+       router.post('/genreWise',(req,res,next) => {
+         GenreWise.findOneAndUpdate({"Genre": req.body.Genre}, { $addToSet: { Movie: req.body.Movie } }, { upsert: true }, (error, data) => {
+            if (error) {
+                return error
+            }
+            else {
+                console.log(data)
+                res.json({
+                    message: 'Added Succesfully'
+                })
+         }
+        })
+       })
 
          
         // router.post('/movieCount', (req, res, next) => {
