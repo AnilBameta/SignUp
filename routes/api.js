@@ -3,7 +3,10 @@ const router = express.Router();
 const User = require('../models/user');
 const WatchList = require('../models/watchList');
 const MovieCount = require('../models/movieCount');
-const GenreWise =require('../models/genrewise')
+const GenreWise =require('../models/genrewise');
+const GenreWiseCount =require('../models/genrewiseCount');
+
+
 router.post('/Sign', (req, res, next) => {
     User.find({ UserName: req.body.UserName })
         .exec()
@@ -99,16 +102,16 @@ router.post('/watchlist', (req, res, next) => {
 
 
 
-//                 for (let i=0; i<arr1.length; i++)
+//                 for (let i=0; i<mov.length; i++)
 // {
-//         for (let j=i; j<arr1.length; j++)
+//         for (let j=i; j<mov.length; j++)
 //         {
-//                 if (arr1[i] == arr1[j])
+//                 if (mov[i] == mov[j])
 //                  m++;
 //                 if (mf<m)
 //                 {
 //                   mf=m; 
-//                   item = arr1[i];
+//                   item = mov[i];
 //                 }
 //         }
 //         m=0;
@@ -172,6 +175,9 @@ router.post('/watchlist', (req, res, next) => {
                   )
                   .catch(err => err)
             })
+
+
+           
            
            
 
@@ -184,17 +190,93 @@ router.post('/watchlist', (req, res, next) => {
         })
        
        router.post('/genreWise',(req,res,next) => {
-         GenreWise.findOneAndUpdate({"Genre": req.body.Genre}, { $addToSet: { Movie: req.body.Movie } }, { upsert: true }, (error, data) => {
+         GenreWise.findOneAndUpdate({"Genre": req.body.Genre}, { $push: { MoviesList: req.body.Movie } }, { upsert: true }, (error, data) => {
             if (error) {
                 return error
             }
             else {
-                console.log(data)
+                
                 res.json({
                     message: 'Added Succesfully'
                 })
          }
         })
+
+        let mov =[] ;
+        let m=0,mf=1,item='';
+        GenreWise.find({"Genre": req.body.Genre})
+        .then(response => {
+            mov = response[0].MoviesList
+            console.log(mov)
+
+            for (let i=0; i<mov.length; i++)
+{
+        for (let j=i; j<mov.length; j++)
+        {
+                if (mov[i] == mov[j])
+                 m++;
+                if (mf<m)
+                {
+                  mf=m; 
+                  item = mov[i];
+                }
+        }
+        m=0;
+}
+console.log(`${item} ( ${mf} times ) `) ;
+
+GenreWiseCount.findOneAndUpdate({"Genre": req.body.Genre},
+{"Genre": req.body.Genre,
+ "Movie":item,
+ "count":mf
+},{upsert:true},
+(error, data) => {
+    if (error) {
+        return error
+    }
+    else {
+        
+        res.json({
+            message: 'Added Succesfully'
+        })
+ }}
+ )
+
+
+        })
+        .catch(err => err)
+
+       
+
+
+        // GenreWiseCount.findOneAndUpdate({"Genre": req.body.Genre})
+
+
+        // GenreWise.find({"Genre": req.body.Genre})
+        // .then(response => {
+        //     response[0].aggregate(
+        //         [
+        //           { $unwind : "$MoviesList" },
+        //           { $group : { _id : "$MoviesList" , count : { $sum : 1 } } },
+        //           { $sort : { count : -1 } },
+        //           { $limit : 1 }
+        //         ]
+        //       )
+        //       .then( result => {
+        //           GenreWiseCount.insertMany(
+        //             {
+        //                 "Genre":req.body.Genre,
+        //                 "Movie":result[0]._id,
+        //                 "count":result[0].count
+                   
+        //         }
+        //           )
+        //       }
+
+        //       )
+        // })
+
+
        })
 
          
