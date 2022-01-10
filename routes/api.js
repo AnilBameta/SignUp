@@ -81,6 +81,25 @@ router.post('/watchlist', (req, res, next) => {
     }
     )
 
+    WatchList.aggregate(
+        [
+            { $unwind: "$MovieList" },
+            { $group: { _id: "$MovieList", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 1 }
+        ]
+    )
+        .then(response =>
+            MovieCount.insertMany({
+
+                "Movie": response[0]._id,
+                "count": response[0].count
+
+            })
+
+        )
+        .catch(err => err)
+
 }
 )
 
@@ -155,26 +174,7 @@ router.post('/watchlist', (req, res, next) => {
 //     }).catch(err => err);
 // })
 
-router.get('/watchlist', async (req, res, next) => {
-    await WatchList.aggregate(
-        [
-            { $unwind: "$MovieList" },
-            { $group: { _id: "$MovieList", count: { $sum: 1 } } },
-            { $sort: { count: -1 } },
-            { $limit: 1 }
-        ]
-    )
-        .then(response =>
-            MovieCount.insertMany({
 
-                "Movie": response[0]._id,
-                "count": response[0].count
-
-            })
-
-        )
-        .catch(err => err)
-})
 
 
 
@@ -244,9 +244,18 @@ router.post('/genreWise', (req, res, next) => {
 
         })
         .catch(err => 
-            cosnole.log(err))
+            cosole.log(err))
 
 })
+
+
+
+    router.get("/genrewiseCount",(res,req,next) => {
+
+        GenreWiseCount.find({"Genre":req.body.data})
+        .then(response=> res.send(response))
+        .catch(err => res.send(err))
+    })
 
 
 
