@@ -5,7 +5,9 @@ const genreSchema = new Schema( {
         type :String
     },
     Movie: {type: String},
-    MoviesList:{ type: Array}
+    MoviesList:{ type: Array},
+    MostMovie: {type:String},
+    Count:{type:Number}
 
 } )
 

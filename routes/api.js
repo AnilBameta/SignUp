@@ -4,7 +4,7 @@ const User = require('../models/user');
 const WatchList = require('../models/watchList');
 const MovieCount = require('../models/movieCount');
 const GenreWise = require('../models/genrewise');
-const GenreWiseCount = require('../models/genrewiseCount');
+const CountWise = require('../models/countMovie.js')
 
 
 router.post('/Sign', (req, res, next) => {
@@ -55,19 +55,6 @@ router.post('/Login', (req, res, next) => {
 })
 
 router.post('/watchlist', (req, res, next) => {
-
-    // WatchList.find({ UserName: req.body.UserName })
-    //     .exec()
-    //     .then(response => {
-    //         if (response.length < 1) {
-    //             const watchList = new WatchList({
-    //                 UserName: req.body.UserName
-    //             })
-    //             watchList.save()
-    //                 .then(() => res.json())
-    //                 .catch((err) => err)
-    //         }
-    //     })
     WatchList.findOneAndUpdate({ UserName: req.body.UserName }, { $addToSet: { MovieList: req.body.Movie } }, { upsert: true }, (error, data) => {
         if (error) {
             return error
@@ -103,85 +90,6 @@ router.post('/watchlist', (req, res, next) => {
 }
 )
 
-// let max=1
-// let sendItem =''
-// router.get('/watchlist', (req, res, next) => {
-
-//     WatchList.find({}).then(function(response){
-//             res.send(response);
-//             let m =[]
-//             let movie = response.slice()
-//             movie.map(item => {
-//                 item.MovieList.map(items => {
-//                     m.push(items)
-//                 })
-//                 })
-//                 console.log(m)
-
-
-
-
-//                 for (let i=0; i<mov.length; i++)
-// {
-//         for (let j=i; j<mov.length; j++)
-//         {
-//                 if (mov[i] == mov[j])
-//                  m++;
-//                 if (mf<m)
-//                 {
-//                   mf=m; 
-//                   item = mov[i];
-//                 }
-//         }
-//         m=0;
-// }
-// console.log(`${item} ( ${mf} times ) `) ;
-
-
-// let uniqueM = []
-// m.forEach((c) => {
-//     if (!uniqueM.includes(c)) {
-//         uniqueM.push(c);
-//     }
-// });
-// console.log(uniqueM)
-
-// uniqueM.map(item => {
-//     function getOccurrence(array, value) {
-//         var count = 0;
-//         array.forEach((v) => (v.localeCompare(value)===0 && count++));
-//         return count;
-//     }
-//     let output=getOccurrence(m, item)
-
-//     if(output>=max)
-//     {
-//         max=output
-//         sendItem = item
-//     }
-
-// })
-//         console.log(sendItem,max);
-
-
-//         MovieCount.insertMany({
-
-//             "Movie":sendItem,
-//             "count":max
-
-//     }) 
-
-//     }).catch(err => err);
-// })
-
-
-
-
-
-
-
-
-
 router.get('/movieCount', (req, res, next) => {
     MovieCount.find({})
         .then(response => res.send(response[response.length-1]))
@@ -201,6 +109,8 @@ router.post('/genreWise', (req, res, next) => {
             })
         }
     })
+
+
 
     let mov = [];
     let m = 0, mf = 1, item = '';
@@ -222,11 +132,10 @@ router.post('/genreWise', (req, res, next) => {
             }
             console.log(`${item} ( ${mf} times ) `);
 
-            GenreWiseCount.findOneAndUpdate({ "Genre": req.body.Genre },
+            GenreWise.findOneAndUpdate({ "Genre": req.body.Genre },
                 {
-                    "Genre": req.body.Genre,
-                    "Movie": item,
-                    "count": mf
+                    "MostMovie": item,
+                    "Count": mf
                 }, { upsert: true },
                 (err, data) => {
                     if (err) {
@@ -250,96 +159,20 @@ router.post('/genreWise', (req, res, next) => {
 
 
 
-    router.get("/genrewiseCount",(req,res,next) => {
+
+
+
+
+
+     
+
+
+
+    router.get("/genreWise",(req,res,next) => {
 
         GenreWiseCount.find({})
         .then(response=> res.send(response))
         .catch(err => err)
     })
-
-
-
-// GenreWiseCount.findOneAndUpdate({"Genre": req.body.Genre})
-
-
-// GenreWise.find({"Genre": req.body.Genre})
-// .then(response => {
-//     response[0].aggregate(
-//         [
-//           { $unwind : "$MoviesList" },
-//           { $group : { _id : "$MoviesList" , count : { $sum : 1 } } },
-//           { $sort : { count : -1 } },
-//           { $limit : 1 }
-//         ]
-//       )
-//       .then( result => {
-//           GenreWiseCount.insertMany(
-//             {
-//                 "Genre":req.body.Genre,
-//                 "Movie":result[0]._id,
-//                 "count":result[0].count
-
-//         }
-//           )
-//       }
-
-//       )
-// })
-
-
-
-
-
-// router.post('/movieCount', (req, res, next) => {
-
-//     MovieCount.find({ Movie: req.body.Movie })
-//         .exec()
-//         .then(response => {
-//             if (response.length < 1) {
-//                 const movieCount = new MovieCount({
-//                     Movie: req.body.Movie,
-//                     count: req.body.count
-//                 })
-//                 movieCount.save()
-//                     .then(() => res.json())
-//                     .catch((err) => err)
-//             }
-//             else {
-//               MovieCount.update({Movie: req.body.Movie,Count: req.body.Count},{$set:{Movie:sendItem,Count:max}},(err => console.log(err)))
-//             }
-//         })
-//         .catch(err => err)
-
-//     })
-
-
-
-
-
-//  router.post('/movieCount', (req, res, next) => {
-// MovieCount.find({Movie: req.body.Movie})
-//     .exec()
-//     .then(response => {
-//         if(response.length < 1) {
-//             const movieCount =new MovieCount( {
-//                 Movie: req.body.Movie,
-//                 count: 1
-//             })
-//             movieCount.save()
-//                     .then(() => res.json())
-//                     .catch((err) => err)
-//         }
-
-//         else {
-//             MovieCount.updateOne(
-//                 {Movie: req.body.Movie},
-//                 { $inc: { count: +1 } }
-//              )
-//         }
-//     })
-
-//  })
-
-
 
 module.exports = router;
