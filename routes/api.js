@@ -213,7 +213,7 @@ router.post('/genreWise', (req, res, next) => {
                 for (let j = i; j < mov.length; j++) {
                     if (mov[i] == mov[j])
                         m++;
-                    if (mf < m) {
+                    if (mf <= m) {
                         mf = m;
                         item = mov[i];
                     }
@@ -250,11 +250,11 @@ router.post('/genreWise', (req, res, next) => {
 
 
 
-    router.get("/genrewiseCount",(res,req,next) => {
+    router.get("/genrewiseCount",(req,res,next) => {
 
-        GenreWiseCount.find({"Genre":req.body.data})
+        GenreWiseCount.find({})
         .then(response=> res.send(response))
-        .catch(err => res.send(err))
+        .catch(err => err)
     })
 
 
