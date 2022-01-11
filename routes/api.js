@@ -184,7 +184,7 @@ router.post('/watchlist', (req, res, next) => {
 
 router.get('/movieCount', (req, res, next) => {
     MovieCount.find({})
-        .then(response => res.send(response))
+        .then(response => res.send(response[response.length-1]))
         .catch(err => err)
 
 })
