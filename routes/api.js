@@ -183,7 +183,7 @@ router.post('/watchlist', (req, res, next) => {
 
 
 router.get('/movieCount', (req, res, next) => {
-    MovieCount.find({})
+    MovieCount.find({ "Movie": sendItem })
         .then(response => res.send(response))
         .catch(err => err)
 
@@ -252,7 +252,7 @@ router.post('/genreWise', (req, res, next) => {
 
     router.get("/genrewiseCount",(res,req,next) => {
 
-        GenreWiseCount.find({"Genre":req.body.data})
+        GenreWiseCount.find({})
         .then(response=> res.send(response))
         .catch(err => res.send(err))
     })
