@@ -4,7 +4,7 @@ const User = require('../models/user');
 const WatchList = require('../models/watchList');
 const MovieCount = require('../models/movieCount');
 const GenreWise = require('../models/genrewise');
-const CountWise = require('../models/countMovie.js')
+
 
 
 router.post('/Sign', (req, res, next) => {
@@ -170,7 +170,7 @@ router.post('/genreWise', (req, res, next) => {
 
     router.get("/genreWise",(req,res,next) => {
 
-        GenreWiseCount.find({})
+        GenreWise.find({})
         .then(response=> res.send(response))
         .catch(err => err)
     })
