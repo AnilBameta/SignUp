@@ -113,24 +113,49 @@ router.post('/genreWise', (req, res, next) => {
 
 
     let mov = [];
-    let m = 0, mf = 1, item = '';
+
     GenreWise.find({ "Genre": req.body.Genre })
         .then(response => {
             mov = response[0].MoviesList
             console.log(mov)
 
-            for (let i = 0; i < mov.length; i++) {
-                for (let j = i; j < mov.length; j++) {
-                    if (mov[i] == mov[j])
-                        m++;
-                    if (mf <= m) {
-                        mf = m;
-                        item = mov[i];
-                    }
-                }
-                m = 0;
-            }
-            console.log(`${item} ( ${mf} times ) `);
+
+            let hmap = new Map();
+		
+		hmap.put(mov[0], 1);
+		
+		let maxFrequency =  1;
+		let maxElement = mov[0];
+		
+		for(let i=1;i<mov.length;i++) {
+			let keyExists = hmap.containsKey(mov[i]);
+			if(keyExists) {
+				let existingFreq = hmap.get(mov[i]);
+				hmap.put(mov[i], existingFreq+1);
+			}else {
+				hmap.put(mov[i],1);
+			}
+			
+			let freq = hmap.get(mov[i]);
+			if(freq > maxFrequency) {
+				maxFrequency = freq;
+				maxElement = mov[i];
+			}
+
+		}
+
+            // for (let i = 0; i < mov.length; i++) {
+            //     for (let j = i; j < mov.length; j++) {
+            //         if (mov[i] == mov[j])
+            //             m++;
+            //         if (mf <= m) {
+            //             mf = m;
+            //             item = mov[i];
+            //         }
+            //     }
+            //     m = 0;
+            // }
+            console.log(`${maxElement} ( ${maxFrequency} times ) `);
 
             GenreWise.findOneAndUpdate({ "Genre": req.body.Genre },
                 {
