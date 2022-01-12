@@ -4,7 +4,7 @@ const User = require('../models/user');
 const WatchList = require('../models/watchList');
 const MovieCount = require('../models/movieCount');
 const GenreWise = require('../models/genrewise');
-
+const GenreWiseCount = require('../models/genreWiseCount');
 
 
 router.post('/Sign', (req, res, next) => {
@@ -108,7 +108,7 @@ if(selected){
     res.json({
         status:"existing movie found"
     })
-     await GenreWise.findOneAndUpdate(
+     const selectedMovie=await GenreWise.findOneAndUpdate(
         {
         Movie:req.body.Movie,
         Genre:req.body.Genre
@@ -118,6 +118,7 @@ if(selected){
             upsert:true
         }
     )
+    selectedMovie.save()
     
 }
 else{
@@ -133,8 +134,21 @@ else{
 }
 
  GenreWise.find({Genre : req.body.Genre}).sort({Count:-1}).limit(1)
- .then(re=> console.log(re))
+ .then(re=> {
+     console.log(re[0].Genre,re[0].Movie,re[0].Count)
+    GenreWiseCount.findOneAndUpdate({Genre:re[0].Genre},
+    {
+        MaxMovie:re[0].Movie,
+        Count:re[0].Count
+    },
+    {
+        upsert:true
+    })
+    
+ })
+ .catch(err => console.log(err))
 })
+
 
 
 
