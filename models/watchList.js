@@ -6,9 +6,6 @@ const WatchListSchema = new Schema({
         type: String,
         required: [true, 'UserName field is required']
     },
-    Movie: {
-        type:String
-    },
     MovieList: [String]
     
 })

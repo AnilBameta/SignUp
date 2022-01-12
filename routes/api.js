@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 const WatchList = require('../models/watchList');
-const MovieCount = require('../models/movieCount');
 const GenreWise = require('../models/genrewise');
-const GenreWiseCount = require('../models/genreWiseCount');
+const { response } = require('express');
+
 
 
 router.post('/Sign', (req, res, next) => {
@@ -67,7 +67,9 @@ router.post('/watchlist', (req, res, next) => {
         }
     }
     )
-
+}
+)
+   router.get('/mostMovie',(req,res,next)=> {
     WatchList.aggregate(
         [
             { $unwind: "$MovieList" },
@@ -77,90 +79,94 @@ router.post('/watchlist', (req, res, next) => {
         ]
     )
         .then(response =>
-            MovieCount.insertMany({
-
-                "Movie": response[0]._id,
-                "count": response[0].count
-
-            })
-
+            res.send(response)
         )
         .catch(err => err)
-
-}
-)
-
-router.get('/movieCount', (req, res, next) => {
-    MovieCount.find({})
-        .then(response => res.send(response[response.length-1]))
-        .catch(err => err)
-
-})
+   }) 
 
 
-router.post('/genreWise',async(req,res,next)=>{
-const selected = await GenreWise.findOne({
-    Movie:req.body.Movie,
-    Genre:req.body.Genre
-})
 
-if(selected){
-    res.json({
-        status:"existing movie found"
+
+router.post('/genreWise', async (req, res, next) => {
+    const userselected = await GenreWise.findOne({
+        Username:req.body.UserName,
+        Movie: req.body.Movie,
+        Genre: req.body.Genre
     })
-     const selectedMovie=await GenreWise.findOneAndUpdate(
-        {
-        Movie:req.body.Movie,
-        Genre:req.body.Genre
-        },{
-            Count:selected.Count+1
-        },{
-            upsert:true
-        }
-    )
-    selectedMovie.save()
-    
-}
-else{
-     await GenreWise.create({
-        Movie:req.body.Movie,
-        Genre:req.body.Genre,
-        Count:1
+    if(userselected){
+        res.json({Message:"Movie Aready Added"})
+    }
+    else {
+    const selected = await GenreWise.findOne({
+        Movie: req.body.Movie,
+        Genre: req.body.Genre
     })
-    .then(res.json({
-        status:"new movie added to db"
-    }))
-        
-}
-
- GenreWise.find({Genre : req.body.Genre}).sort({Count:-1}).limit(1)
- .then(re=> {
-     console.log(re[0].Genre,re[0].Movie,re[0].Count)
-    GenreWiseCount.findOneAndUpdate({Genre:re[0].Genre},
-    {
-        MaxMovie:re[0].Movie,
-        Count:re[0].Count
-    },
-    {
-        upsert:true
-    })
-    
- })
- .catch(err => console.log(err))
-})
-
-
-
-
      
+    if (selected) {
+        res.json({
+            status: "existing movie found"
+        })
+        const selectedMovie = await GenreWise.findOneAndUpdate(
+            {
+                Movie: req.body.Movie,
+                Genre: req.body.Genre
+            }, {
+            Count: selected.Count + 1
+        }, {
+            upsert: true
+        }
+        )
+        selectedMovie.save()
+
+    }
+    else {
+        await GenreWise.create({
+            Movie: req.body.Movie,
+            Genre: req.body.Genre,
+            Count: 1
+        })
+            .then(res.json({
+                status: "new movie added to db"
+            }))
+
+    }
+}
+})
 
 
 
-    router.get("/genreWise",(req,res,next) => {
 
-        GenreWise.find({})
-        .then(response=> res.send(response))
-        .catch(err => err)
+
+
+
+
+
+
+
+router.get("/genreWise", (req, res, next) => {
+    const mySet1 = ["Comedy","Thriller","Adventure","Science Fiction","Action","Horror"]
+    let myvalue1 = []
+    try{
+      let c=0;  
+    mySet1.forEach(function(value) {
+    GenreWise.find({ Genre: value }).sort({ Count: -1 }).limit(1)
+        .then(re => {
+           myvalue1.push(re[0])
+           c++
+           if(c==6)
+           {
+             res.send(myvalue1)
+           }
+        })
+        .catch(err => console.log(err)) 
     })
+   
+    
+}
+catch{
+    res.send("No movie entered")
+}
+
+})
 
 module.exports = router;
