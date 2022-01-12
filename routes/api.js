@@ -97,95 +97,44 @@ router.get('/movieCount', (req, res, next) => {
 
 })
 
-router.post('/genreWise', (req, res, next) => {
-    GenreWise.findOneAndUpdate({ "Genre": req.body.Genre }, { $push: { MoviesList: req.body.Movie } }, { upsert: true }, (error, data) => {
-        if (error) {
-            return error
-        }
-        else {
 
-            res.json({
-                message: 'Added Succesfully'
-            })
-        }
-    })
-
-
-
-    let mov = [];
-
-    GenreWise.find({ "Genre": req.body.Genre })
-        .then(response => {
-            mov = response[0].MoviesList
-            console.log(mov)
-
-
-            let hmap = new Map();
-		
-		hmap.put(mov[0], 1);
-		
-		let maxFrequency =  1;
-		let maxElement = mov[0];
-		
-		for(let i=1;i<mov.length;i++) {
-			let keyExists = hmap.containsKey(mov[i]);
-			if(keyExists) {
-				let existingFreq = hmap.get(mov[i]);
-				hmap.put(mov[i], existingFreq+1);
-			}else {
-				hmap.put(mov[i],1);
-			}
-			
-			let freq = hmap.get(mov[i]);
-			if(freq > maxFrequency) {
-				maxFrequency = freq;
-				maxElement = mov[i];
-			}
-
-		}
-
-            // for (let i = 0; i < mov.length; i++) {
-            //     for (let j = i; j < mov.length; j++) {
-            //         if (mov[i] == mov[j])
-            //             m++;
-            //         if (mf <= m) {
-            //             mf = m;
-            //             item = mov[i];
-            //         }
-            //     }
-            //     m = 0;
-            // }
-            console.log(`${maxElement} ( ${maxFrequency} times ) `);
-
-            GenreWise.findOneAndUpdate({ "Genre": req.body.Genre },
-                {
-                    "MostMovie": item,
-                    "Count": mf
-                }, { upsert: true },
-                (err, data) => {
-                    if (err) {
-                        return err
-                    }
-                    else {
-
-                        res.json({
-                            message: 'Added Succesfully'
-                        })
-                    }
-                }
-            )
-
-
-        })
-        .catch(err => 
-            cosole.log(err))
-
+router.post('/genreWise',async(req,res,next)=>{
+const selected = await GenreWise.findOne({
+    Movie:req.body.Movie,
+    Genre:req.body.Genre
 })
 
+if(selected){
+    res.json({
+        status:"existing movie found"
+    })
+     await GenreWise.findOneAndUpdate(
+        {
+        Movie:req.body.Movie,
+        Genre:req.body.Genre
+        },{
+            Count:selected.Count+1
+        },{
+            upsert:true
+        }
+    )
+    
+}
+else{
+     await GenreWise.create({
+        Movie:req.body.Movie,
+        Genre:req.body.Genre,
+        Count:1
+    })
+    .then(res.json({
+        status:"new movie added to db"
+    }))
+        
+}
 
-
-
-
+ GenreWise.find({Genre : req.body.Genre}).sort({Count:-1}).limit(1)
+ .then(re=> console.log(re))
+})
 
 
 
