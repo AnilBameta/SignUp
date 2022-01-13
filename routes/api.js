@@ -113,15 +113,18 @@ router.post('/genreWise', async (req, res, next) => {
             Count: selected.Count + 1
         }
         )
+        .then(res.json({
+            status: "Movie Count Updated"
+        }))
         selectedMovie.save()
 
     }
     else {
         await GenreWise.create({
-            $push: { UserName: req.body.User },
+            UserName:[req.body.User],
             Movie: req.body.Movie,
             Genre: req.body.Genre,
-            Count: 1
+            Count: 1,
         })
             .then(res.json({
                 status: "new movie added to db"
@@ -141,30 +144,19 @@ router.post('/genreWise', async (req, res, next) => {
 
 
 
-router.get("/genreWise", (req, res, next) => {
-    const mySet1 = ["Comedy","Thriller","Adventure","Science Fiction","Action","Horror"]
-    let myvalue1 = []
-    try{
-      let c=0;  
-    mySet1.forEach(function(value) {
-    GenreWise.find({ Genre: value }).sort({ Count: -1 }).limit(1)
+router.post("/genreWiseCount", (req, res, next) => {
+    
+    GenreWise.find({ Genre: req.body.Genre }).sort({ Count: -1 }).limit(1)
         .then(re => {
-           myvalue1.push(re[0])
-           c++
-           if(c==6)
-           {
-             res.send(myvalue1)
-           }
+           res.send(re);
         })
         .catch(err => console.log(err)) 
     })
    
     
-}
-catch{
-    res.send("No movie entered")
-}
 
-})
+
+
+
 
 module.exports = router;
