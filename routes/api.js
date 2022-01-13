@@ -89,7 +89,7 @@ router.post('/watchlist', (req, res, next) => {
 
 router.post('/genreWise', async (req, res, next) => {
     const userselected = await GenreWise.findOne({
-        Username:req.body.UserName,
+        UserName:req.body.UserName,
         Movie: req.body.Movie,
         Genre: req.body.Genre
     })
@@ -103,11 +103,9 @@ router.post('/genreWise', async (req, res, next) => {
     })
      
     if (selected) {
-        res.json({
-            status: "existing movie found"
-        })
         const selectedMovie = await GenreWise.findOneAndUpdate(
             {
+                $push: { UserName: req.body.UserName } ,
                 Movie: req.body.Movie,
                 Genre: req.body.Genre
             }, {
@@ -121,6 +119,7 @@ router.post('/genreWise', async (req, res, next) => {
     }
     else {
         await GenreWise.create({
+            $push: { UserName: req.body.UserName },
             Movie: req.body.Movie,
             Genre: req.body.Genre,
             Count: 1
